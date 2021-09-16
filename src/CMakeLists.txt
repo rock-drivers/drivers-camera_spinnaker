@@ -20,6 +20,7 @@ rock_library(camera_spinnaker
         cm3.h
         gh3.h
         set_property.h
+        camera_exceptions.h
         SpinnakerCamera.h
         SpinnakerConfig.h
     DEPS_PLAIN
