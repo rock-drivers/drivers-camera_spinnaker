@@ -6,7 +6,7 @@ Camera Spinnaker library using the FLIR Spinnaker SDK
 
 License
 -------
-dummy-license
+BSD
 
 Installation
 ------------
