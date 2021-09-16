@@ -1,20 +1,15 @@
 <package>
   <description brief="Camera Spinnaker using the FLIR Spinnaker SDK">
-  Camera Spinnaker library using the FLIR Spinnaker SDK
+  Camera Spinnaker library using the FLIR Spinnaker SDK base on the existing ros library
   </description>
   <author>javier Hidalgo-Carrio/havyhidalgo@gmail.com</author>
   <license></license>
-  <url>http://</url>
+  <url> https://github.com/ros-drivers/flir_camera_driver </url>
   <logo>http://</logo>
   <depend package="base/cmake" />
-  <!--
-   To add any dependencies use the depend tag
-  <depend package="dummy-dependency-0" />
-	...
-  <depend package="dummy-dependency-n-1" />
-  <depend package="dummy-dependency-n" />
-  -->
   <depend package="base/types" />
-  <depend package="perception/frame_helper" />
+  <depend package="perception/frame_helper" optional="1"/>
   <depend package="base/logging" />
+  <rosdep name="spinnaker" />
+  <tags>needs_opt</tags>
 </package>
