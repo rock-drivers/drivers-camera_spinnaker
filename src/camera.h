@@ -7,8 +7,8 @@
 #include <camera_spinnaker/set_property.h>
 
 // Spinnaker SDK
-#include "Spinnaker.h"
-#include "SpinGenApi/SpinnakerGenApi.h"
+#include <Spinnaker.h>
+#include <SpinGenApi/SpinnakerGenApi.h>
 
 //*******************************************
 // This Class contains camera control functions.

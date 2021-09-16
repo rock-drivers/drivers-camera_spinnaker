@@ -1,5 +1,5 @@
 
-#include "camera_spinnaker/camera.h"
+#include <camera_spinnaker/camera.h>
 
 #include <base-logging/Logging.hpp>
 #include <string>

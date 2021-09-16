@@ -1,4 +1,4 @@
-#include "camera_spinnaker/SpinnakerCamera.h"
+#include <camera_spinnaker/SpinnakerCamera.h>
 
 #include <iostream>
 #include <sstream>
@@ -367,7 +367,6 @@ void SpinnakerCamera::grabImage(base::samples::frame::Frame* image, const std::s
             }
             else if (bits_per_pixel == 24) // color RGB
             {
-                std::cout<<"RGB IMAGE"<<std::endl;
                 mode = ::base::samples::frame::frame_mode_t::MODE_RGB;
                 color_depth = 8; //3-channels, 8-bits per channel
             }

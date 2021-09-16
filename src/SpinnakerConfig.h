@@ -61,7 +61,7 @@ namespace camera_spinnaker
     SpinnakerConfig()
     {
         acquisition_frame_rate = 10.0;
-        acquisition_frame_rate_enable = 0;
+        acquisition_frame_rate_enable = 1;
         exposure_mode = "Timed";
         exposure_auto = "Once";
         exposure_time = 100.0;
