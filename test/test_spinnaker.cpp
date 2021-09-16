@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_spinnaker_driver)
             base::samples::frame::Frame img;
             for (int i=0; i<10; ++i)
             {
-                spinnaker.grabImage(&img, "image_test");
+                spinnaker.grabImage(img, "image_test");
                 std::cout<<"[time] "<<img.time.toString()<<" img size "<<img.size.width<<" x "<<img.size.height<<" px_size: "<<img.pixel_size <<" data size: "<<img.image.size()
                      <<" img mode "<<img.frame_mode<<std::endl;
                 cv::Mat img_mat = frame_helper::FrameHelper::convertToCvMat(img);

@@ -281,7 +281,7 @@ void SpinnakerCamera::stop()
   }
 }
 
-void SpinnakerCamera::grabImage(base::samples::frame::Frame* image, const std::string& frame_id)
+void SpinnakerCamera::grabImage(base::samples::frame::Frame &image, const std::string& frame_id)
 {
   std::lock_guard<std::mutex> scopedLock(mutex_);
 
@@ -303,7 +303,7 @@ void SpinnakerCamera::grabImage(base::samples::frame::Frame* image, const std::s
       else
       {
         // Set Image Time Stamp
-        image->time = base::Time::fromMicroseconds(image_ptr->GetTimeStamp() * 1e-3);
+        image.time = base::Time::fromMicroseconds(image_ptr->GetTimeStamp() * 1e-3);
 
         // Check the bits per pixel.
         size_t bits_per_pixel = image_ptr->GetBitsPerPixel();
@@ -365,18 +365,18 @@ void SpinnakerCamera::grabImage(base::samples::frame::Frame* image, const std::s
                 mode = ::base::samples::frame::frame_mode_t::MODE_GRAYSCALE;
                 color_depth = bits_per_pixel; //one channel 16 or 8 bits per channel
             }
-            else if (bits_per_pixel == 24) // color RGB
+            else if (bits_per_pixel == 24) // color BGR
             {
-                mode = ::base::samples::frame::frame_mode_t::MODE_RGB;
+                mode = ::base::samples::frame::frame_mode_t::MODE_BGR;
                 color_depth = 8; //3-channels, 8-bits per channel
             }
         }
 
         /** Init the image frame **/
-        image->init(width, height, color_depth, mode);
+        image.init(width, height, color_depth, mode);
 
         /** Fill the image **/
-        memcpy(&(image->image[0]), image_ptr->GetData(), image->image.size());
+        memcpy(&(image.image[0]), image_ptr->GetData(), image.image.size());
 
       }// end else
     }
