@@ -60,6 +60,7 @@ BOOST_AUTO_TEST_CASE(test_spinnaker_driver)
 {
     camera_spinnaker::SpinnakerCamera spinnaker;// Instance of the SpinnakerCamera library, used to interface with the hardware.
     camera_spinnaker::SpinnakerConfig config;// configuration
+    config.acquisition_frame_rate = 1.0;
 
     Spinnaker::SystemPtr system = Spinnaker::System::GetInstance();
     Spinnaker::InterfaceList interfaceList = system->GetInterfaces();
@@ -80,8 +81,16 @@ BOOST_AUTO_TEST_CASE(test_spinnaker_driver)
             BOOST_TEST_MESSAGE("\033[93mCONNECTING TO THE CAMERA.. ");
             spinnaker.connect();
             BOOST_TEST_MESSAGE("\033[93mCONNECTED TO THE CAMERA.. ");
-            double timeout = 1.0; BOOST_TEST_MESSAGE("Setting timeout to: "<< timeout<<"[seconds]");
-            spinnaker.setTimeout(timeout);
+            spinnaker.setNewConfiguration(config, SpinnakerCamera::LEVEL_RECONFIGURE_STOP);
+            try
+            {
+                double timeout = 1.0; BOOST_TEST_MESSAGE("Setting timeout to: "<< timeout<<"[seconds]");
+                spinnaker.setTimeout(timeout);
+            }
+            catch (const std::runtime_error& e)
+            {
+                std::cout<<"[ERROR] "<<e.what()<<std::endl;
+            }
 
             BOOST_TEST_MESSAGE("\033[93mSTARTING THE CAMERA.. ");
             spinnaker.start();
@@ -89,11 +98,14 @@ BOOST_AUTO_TEST_CASE(test_spinnaker_driver)
 
             BOOST_TEST_MESSAGE("\033[93mGRAB AN IMAGE FROM CAMERA WITH SERIAL: "<< spinnaker.getSerial());
             base::samples::frame::Frame img;
-            spinnaker.grabImage(&img, "image_test");
-            std::cout<<"[time] "<<img.time.toString()<<" img size "<<img.size.width<<" x "<<img.size.height<<" px_size: "<<img.pixel_size <<" data size: "<<img.image.size()
+            for (int i=0; i<10; ++i)
+            {
+                spinnaker.grabImage(&img, "image_test");
+                std::cout<<"[time] "<<img.time.toString()<<" img size "<<img.size.width<<" x "<<img.size.height<<" px_size: "<<img.pixel_size <<" data size: "<<img.image.size()
                      <<" img mode "<<img.frame_mode<<std::endl;
-            cv::Mat img_mat = frame_helper::FrameHelper::convertToCvMat(img);
-            cv::imwrite("/tmp/img_mat.png", img_mat);
+                cv::Mat img_mat = frame_helper::FrameHelper::convertToCvMat(img);
+                cv::imwrite("/tmp/img_mat_"+std::to_string(i)+".png", img_mat);
+            }
 
             BOOST_TEST_MESSAGE("\033[93mSTOPPING THE CAMERA.. ");
             spinnaker.stop();
