@@ -122,6 +122,29 @@ public:
   int getWidthMax();
   Spinnaker::GenApi::CNodePtr readProperty(const Spinnaker::GenICam::gcstring property_name);
 
+ static base::samples::frame::frame_mode_t type2FrameType (const std::string &image_format)
+ {
+    if ((image_format.compare("BayerRG")==0) || (image_format.find("BayerRG") != std::string::npos))
+        return ::base::samples::frame::frame_mode_t::MODE_BAYER_RGGB;
+    else if ((image_format.compare("Mono8")==0) || (image_format.compare("Mono16") == 0)
+            || (image_format.compare("Mono12p")==0) || (image_format.compare("Mono12Packed") == 0))
+        return ::base::samples::frame::frame_mode_t::MODE_GRAYSCALE;
+    else if ((image_format.compare("BayerGR")==0) || (image_format.find("BayerGR") != std::string::npos))
+        return ::base::samples::frame::frame_mode_t::MODE_BAYER_GRBG;
+    else if ((image_format.compare("BayerGB")==0) || (image_format.find("BayerGB") != std::string::npos))
+        return ::base::samples::frame::frame_mode_t::MODE_BAYER_GBRG;
+    else if ((image_format.compare("BayerBG")==0) || (image_format.find("BayerBG") != std::string::npos))
+        return ::base::samples::frame::frame_mode_t::MODE_BAYER_BGGR;
+    else if ((image_format.compare("BGRa8")==0) || (image_format.compare("BGR8") ==0))
+        return ::base::samples::frame::frame_mode_t::MODE_BGR;
+    else if (image_format.find("RGB8") != std::string::npos)
+        return ::base::samples::frame::frame_mode_t::MODE_RGB;
+    else if (image_format.find("YUV") != std::string::npos)
+        return ::base::samples::frame::frame_mode_t::MODE_UYVY;
+    else
+        return ::base::samples::frame::frame_mode_t::MODE_UNDEFINED;
+ }
+
   uint32_t getSerial()
   {
     return serial_;

@@ -62,6 +62,10 @@ BOOST_AUTO_TEST_CASE(test_spinnaker_driver)
     camera_spinnaker::SpinnakerConfig config;// configuration
     config.acquisition_frame_rate = 1.0;
 
+    /** Check deflaut configuration colro format **/
+    BOOST_CHECK_EQUAL(camera_spinnaker::SpinnakerCamera::type2FrameType(config.image_format_color_coding), ::base::samples::frame::frame_mode_t::MODE_BGR);
+    BOOST_TEST_MESSAGE("\033[93mCONFIG FORMAT TYPE.. "<<camera_spinnaker::SpinnakerCamera::type2FrameType(config.image_format_color_coding));
+
     Spinnaker::SystemPtr system = Spinnaker::System::GetInstance();
     Spinnaker::InterfaceList interfaceList = system->GetInterfaces();
     Spinnaker::CameraList camList = system->GetCameras();
@@ -84,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_spinnaker_driver)
             spinnaker.setNewConfiguration(config, SpinnakerCamera::LEVEL_RECONFIGURE_STOP);
             try
             {
-                double timeout = 1.0; BOOST_TEST_MESSAGE("Setting timeout to: "<< timeout<<"[seconds]");
+                double timeout = 1.0; BOOST_TEST_MESSAGE("Setting timeout to: "<< timeout<<" [seconds]");
                 spinnaker.setTimeout(timeout);
             }
             catch (const std::runtime_error& e)
