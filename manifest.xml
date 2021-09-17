@@ -11,5 +11,5 @@
   <depend package="perception/frame_helper" optional="1"/>
   <depend package="base/logging" />
   <rosdep name="spinnaker" />
-  <tags>needs_opt</tags>
+  <tags>stable</tags>
 </package>
