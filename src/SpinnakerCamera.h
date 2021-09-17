@@ -94,7 +94,7 @@ public:
   * \param image base::samples::frame::Frame that will be filled with the image currently in the buffer.
   * \param frame_id The name of the optical frame of the camera.
   */
-  void grabImage(base::samples::frame::Frame &image, const std::string& frame_id);
+  void grabImage(base::samples::frame::Frame &frame, const std::string& frame_id);
 
   /*!
   * \brief Will set grabImage timeout for the camera.

@@ -281,7 +281,7 @@ void SpinnakerCamera::stop()
   }
 }
 
-void SpinnakerCamera::grabImage(base::samples::frame::Frame &image, const std::string& frame_id)
+void SpinnakerCamera::grabImage(base::samples::frame::Frame &frame, const std::string& frame_id)
 {
   std::lock_guard<std::mutex> scopedLock(mutex_);
 
@@ -302,9 +302,6 @@ void SpinnakerCamera::grabImage(base::samples::frame::Frame &image, const std::s
       }
       else
       {
-        // Set Image Time Stamp
-        image.time = base::Time::fromMicroseconds(image_ptr->GetTimeStamp() * 1e-3);
-
         // Check the bits per pixel.
         size_t bits_per_pixel = image_ptr->GetBitsPerPixel();
 
@@ -373,10 +370,16 @@ void SpinnakerCamera::grabImage(base::samples::frame::Frame &image, const std::s
         }
 
         /** Init the image frame **/
-        image.init(width, height, color_depth, mode);
+        frame.init(width, height, color_depth, mode);
+
+        /** Set Image Time Stamp **/
+        frame.time = base::Time::now();//base::Time::fromMicroseconds(image_ptr->GetTimeStamp() * 1e-3);
+        double time = image_ptr->GetTimeStamp() * 1e-9;
+        frame.setAttribute<double>("CameraTimeStamp",time);
+        frame.setAttribute<uint32_t>("SerialID", serial_);
 
         /** Fill the image **/
-        memcpy(&(image.image[0]), image_ptr->GetData(), image.image.size());
+        memcpy(&(frame.image[0]), image_ptr->GetData(), frame.image.size());
 
       }// end else
     }
