@@ -317,6 +317,7 @@ void SpinnakerCamera::grabImage(base::samples::frame::Frame &frame, const std::s
         int stride = image_ptr->GetStride();
         //std::cout<<"bits_per_pixel:  "<<bits_per_pixel<<std::endl;
         //std::cout<<"stride:  "<<stride<<std::endl;
+        //std::cout<<"color_filter_str:  "<<color_filter_str<<std::endl;
 
         /** Image size **/
         int width = image_ptr->GetWidth();
