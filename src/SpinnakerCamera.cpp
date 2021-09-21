@@ -373,14 +373,14 @@ void SpinnakerCamera::grabImage(base::samples::frame::Frame &frame, const std::s
         /** Init the image frame **/
         frame.init(width, height, color_depth, mode);
 
+        /** Fill the image **/
+        memcpy(&(frame.image[0]), image_ptr->GetData(), frame.image.size());
+
         /** Set Image Time Stamp **/
         frame.time = base::Time::now();//base::Time::fromMicroseconds(image_ptr->GetTimeStamp() * 1e-3);
         double time = image_ptr->GetTimeStamp() * 1e-9;
         frame.setAttribute<double>("CameraTimeStamp",time);
         frame.setAttribute<uint32_t>("SerialID", serial_);
-
-        /** Fill the image **/
-        memcpy(&(frame.image[0]), image_ptr->GetData(), frame.image.size());
 
       }// end else
     }
