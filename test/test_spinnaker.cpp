@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_spinnaker_driver)
 {
     camera_spinnaker::SpinnakerCamera spinnaker;// Instance of the SpinnakerCamera library, used to interface with the hardware.
     camera_spinnaker::SpinnakerConfig config;// configuration
-    config.acquisition_frame_rate = 1.0;
+    config.acquisition_frame_rate = 30.0;
 
     /** Check deflaut configuration colro format **/
     BOOST_CHECK_EQUAL(camera_spinnaker::SpinnakerCamera::type2FrameType(config.image_format_color_coding), ::base::samples::frame::frame_mode_t::MODE_BGR);
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_spinnaker_driver)
             spinnaker.setNewConfiguration(config, SpinnakerCamera::LEVEL_RECONFIGURE_STOP);
             try
             {
-                double timeout = 1.0; BOOST_TEST_MESSAGE("Setting timeout to: "<< timeout<<" [seconds]");
+                double timeout = 2.0; BOOST_TEST_MESSAGE("Setting timeout to: "<< timeout<<" [seconds]");
                 spinnaker.setTimeout(timeout);
             }
             catch (const std::runtime_error& e)
@@ -101,14 +101,25 @@ BOOST_AUTO_TEST_CASE(test_spinnaker_driver)
             BOOST_TEST_MESSAGE("\033[93mSTARTED THE CAMERA.. ");
 
             BOOST_TEST_MESSAGE("\033[93mGRAB AN IMAGE FROM CAMERA WITH SERIAL: "<< spinnaker.getSerial());
-            base::samples::frame::Frame img;
-            for (int i=0; i<10; ++i)
+            for (int i=0; i<20; ++i)
             {
-                spinnaker.grabImage(img, "image_test");
-                std::cout<<"[time] "<<img.time.toString()<<" img size "<<img.size.width<<" x "<<img.size.height<<" px_size: "<<img.pixel_size <<" data size: "<<img.image.size()
-                     <<" img mode "<<img.frame_mode<<std::endl;
-                cv::Mat img_mat = frame_helper::FrameHelper::convertToCvMat(img);
-                cv::imwrite("/tmp/img_mat_"+std::to_string(i)+".png", img_mat);
+                spinnaker.grabImage();
+            }
+
+            for (int i=0; i<20; ++i)
+            {
+                base::samples::frame::Frame img;
+                if (spinnaker.retrieveFrame(img))
+                {
+                    std::cout<<"[time] "<<img.time.toString()<<" img size "<<img.size.width<<" x "<<img.size.height<<" px_size: "<<img.pixel_size <<" data size: "<<img.image.size()
+                            <<" img mode "<<img.frame_mode<<std::endl;
+                    cv::Mat img_mat = frame_helper::FrameHelper::convertToCvMat(img);
+                    cv::imwrite("/tmp/img_mat_"+std::to_string(i)+".png", img_mat);
+                }
+                else
+                {
+                    BOOST_TEST_MESSAGE("\033[93mIMAGE NOT AVAILABLE.. ");
+                }
             }
 
             BOOST_TEST_MESSAGE("\033[93mSTOPPING THE CAMERA.. ");
