@@ -31,6 +31,6 @@ rock_library(camera_spinnaker
         frame_helper
         )
 
-#rock_executable(camera_spinnaker_bin Main.cpp
-#    DEPS camera_spinnaker)
+rock_executable(camera_spinnaker_bin Main.cpp
+    DEPS camera_spinnaker)
 
