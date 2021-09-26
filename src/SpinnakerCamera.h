@@ -78,7 +78,7 @@ public:
   * This function will start the camera capturing images and loading them into the buffer.  To retrieve images,
   * grabImage must be called.
   */
-  void start();
+  void start(const int &buffer_len = 5);
 
   /*!
   * \brief Stops the camera loading data into its buffer.
@@ -94,7 +94,10 @@ public:
   * \param image base::samples::frame::Frame that will be filled with the image currently in the buffer.
   * \param frame_id The name of the optical frame of the camera.
   */
-  void grabImage(base::samples::frame::Frame &frame, const std::string& frame_id);
+  void grabImage();
+
+  bool isFrameAvailable();
+  bool retrieveFrame(::base::samples::frame::Frame &frame, const int &timeout = 1000);
 
   /*!
   * \brief Will set grabImage timeout for the camera.
@@ -179,6 +182,10 @@ private:
   unsigned int packet_delay_;
 
   uint64_t timeout_;
+
+  std::vector<base::samples::frame::Frame> buffer;
+  int buffer_idx;
+  int buffer_idx2;
 
   // This function configures the camera to add chunk data to each image. It does
   // this by enabling each type of chunk data before enabling chunk data mode.

@@ -43,7 +43,7 @@ void SpinnakerCamera::setNewConfiguration(const camera_spinnaker::SpinnakerConfi
   {
     LOG_DEBUG_S<<"SpinnakerCamera::setNewConfiguration: Reconfigure Stop.";
     bool capture_was_running = captureRunning_;
-    start();  // For some reason some params only work after aquisition has be started once.
+    start(config.internal_buffer_size);  // For some reason some params only work after aquisition has be started once.
     stop();
     camera_->setNewConfiguration(config, level);
     if (capture_was_running)
@@ -246,16 +246,23 @@ void SpinnakerCamera::disconnect()
   }
 }
 
-void SpinnakerCamera::start()
+void SpinnakerCamera::start(const int &buffer_len)
 {
   try
   {
     // Check if camera is connected
     if (pCam_ && !captureRunning_)
     {
-      // Start capturing images
-      pCam_->BeginAcquisition();
-      captureRunning_ = true;
+        if (buffer.size()==0)
+            buffer.resize(buffer_len);
+        buffer_idx = 0;
+        buffer_idx2 = 0;
+
+        // Start capturing images
+        pCam_->BeginAcquisition();
+        captureRunning_ = true;
+
+        std::cout<<"START: internal buffer size: "<<this->buffer.size()<<std::endl;
     }
   }
   catch (const Spinnaker::Exception& e)
@@ -281,7 +288,7 @@ void SpinnakerCamera::stop()
   }
 }
 
-void SpinnakerCamera::grabImage(base::samples::frame::Frame &frame, const std::string& frame_id)
+void SpinnakerCamera::grabImage()
 {
   std::lock_guard<std::mutex> scopedLock(mutex_);
 
@@ -370,17 +377,43 @@ void SpinnakerCamera::grabImage(base::samples::frame::Frame &frame, const std::s
             }
         }
 
+        base::samples::frame::Frame &frame = buffer[buffer_idx];
+
         /** Init the image frame **/
         frame.init(width, height, color_depth, mode);
 
+        // do some simple checking
+        if(frame.image.size() != image_ptr->GetImageSize())
+        {
+            std::cerr << "GrabImage does no succeeded: size mismatch, got  " << image_ptr->GetImageSize() << " expected " << frame.image.size()  << std::endl;
+            return;
+        }
+        if(frame.frame_status != base::samples::frame::STATUS_EMPTY)
+        {
+            std::cerr << "buffer underflow: skipping image"  << std::endl;
+            if(buffer_idx == buffer_idx2)
+            {
+                ++buffer_idx2;
+                if(buffer_idx2 >= int(buffer.size()))
+                    buffer_idx2 = 0;
+            }
+        }
+
+        /** Fill the image **/
+        memcpy(&(frame.image[0]), image_ptr->GetData(), frame.image.size());
+
         /** Set Image Time Stamp **/
+        frame.frame_status = base::samples::frame::STATUS_VALID;
         frame.time = base::Time::now();//base::Time::fromMicroseconds(image_ptr->GetTimeStamp() * 1e-3);
         double time = image_ptr->GetTimeStamp() * 1e-9;
         frame.setAttribute<double>("CameraTimeStamp",time);
         frame.setAttribute<uint32_t>("SerialID", serial_);
 
-        /** Fill the image **/
-        memcpy(&(frame.image[0]), image_ptr->GetData(), frame.image.size());
+        //std::cout<<"GOT Image at IDX: "<<buffer_idx<<" time: "<<frame.time.toString()<<std::endl;
+
+        ++buffer_idx;
+        if(buffer_idx >= int(buffer.size()))
+            buffer_idx = 0;
 
       }// end else
     }
@@ -401,10 +434,40 @@ void SpinnakerCamera::grabImage(base::samples::frame::Frame &frame, const std::s
   }
 }  // end grabImage
 
+bool SpinnakerCamera::isFrameAvailable()
+{
+    return !buffer.empty() && buffer[buffer_idx2].frame_status != base::samples::frame::STATUS_EMPTY;
+}
+
+bool SpinnakerCamera::retrieveFrame(::base::samples::frame::Frame &frame, const int &timeout)
+{
+
+    base::Time time = base::Time::now();
+    while(!isFrameAvailable())
+    {
+        if((base::Time::now()-time).toMilliseconds() >= timeout)
+            return false;
+        usleep(100);
+    }
+
+    std::lock_guard<std::mutex> scopedLock(mutex_);
+    const base::samples::frame::Frame &tframe = buffer[0];
+    frame.init(tframe.size.width,tframe.size.height,tframe.data_depth,tframe.frame_mode,-1);
+    frame.frame_status = base::samples::frame::STATUS_EMPTY;
+
+    buffer[buffer_idx2].swap(frame);
+
+    ++buffer_idx2;
+    if(buffer_idx2 >= int(buffer.size()))
+        buffer_idx2 = 0;
+    return true;
+}
+
 void SpinnakerCamera::setTimeout(const double& timeout)
 {
   timeout_ = static_cast<uint64_t>(std::round(timeout * 1000));
 }
+
 void SpinnakerCamera::setDesiredCamera(const uint32_t& id)
 {
   serial_ = id;

@@ -56,6 +56,7 @@ namespace camera_spinnaker
     double time_offset;
     bool state;
     std::string name;
+    int internal_buffer_size;
 
     /** Default values **/
     SpinnakerConfig()
@@ -106,6 +107,7 @@ namespace camera_spinnaker
         auto_exposure_roi_height = 0;
         auto_exposure_lighting_mode = "Normal";
         time_offset = 0.0;
+        internal_buffer_size = 10;
     }
 
     };
