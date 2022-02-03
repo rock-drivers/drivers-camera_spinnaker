@@ -407,7 +407,19 @@ void SpinnakerCamera::grabImage()
         frame.time = base::Time::now();//base::Time::fromMicroseconds(image_ptr->GetTimeStamp() * 1e-3);
         double time = image_ptr->GetTimeStamp() * 1e-9;
         frame.setAttribute<double>("CameraTimeStamp",time);
+        Spinnaker::GenApi::IFloat &exposure = this->pCam_->ExposureTime;
+        frame.setAttribute<double>("ExposureTimeus",exposure.GetValue());
         frame.setAttribute<uint32_t>("SerialID", serial_);
+        // Get the value of exposure time to set an appropriate timeout for GetNextImage
+        //Spinnaker::GenApi::CFloatPtr ptrExposureTime = this->node_map_->GetNode("ExposureTime");
+        //if (!IsAvailable(ptrExposureTime) || !IsReadable(ptrExposureTime))
+        //{
+        //    std::cout << "Unable to read exposure time. Aborting..." << std::endl;
+        //}
+        // The exposure time is retrieved in µs so it needs to be converted to ms
+        //uint64_t timeout = static_cast<uint64_t>(ptrExposureTime->GetValue() / 1000);
+        //std::cout<<"Exposute Time: "<<timeout<<std::endl;
+        //frame.setAttribute<double>("ExposureTimems",timeout);
 
         //std::cout<<"GOT Image at IDX: "<<buffer_idx<<" time: "<<frame.time.toString()<<std::endl;
 
