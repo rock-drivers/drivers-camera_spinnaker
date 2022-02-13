@@ -200,7 +200,7 @@ void SpinnakerCamera::connect()
       }
 
       // Configure chunk data - Enable Metadata
-      // SpinnakerCamera::ConfigureChunkData(*node_map_);
+      SpinnakerCamera::ConfigureChunkData(*node_map_);
     }
     catch (const Spinnaker::Exception& e)
     {
@@ -405,23 +405,18 @@ void SpinnakerCamera::grabImage()
         /** Set Image Time Stamp **/
         frame.frame_status = base::samples::frame::STATUS_VALID;
         frame.time = base::Time::now();//base::Time::fromMicroseconds(image_ptr->GetTimeStamp() * 1e-3);
-        double time = image_ptr->GetTimeStamp() * 1e-9;
-        frame.setAttribute<double>("CameraTimeStamp",time);
-        Spinnaker::GenApi::IFloat &exposure = this->pCam_->ExposureTime;
-        frame.setAttribute<double>("ExposureTimeus",exposure.GetValue());
-        frame.setAttribute<uint32_t>("SerialID", serial_);
-        // Get the value of exposure time to set an appropriate timeout for GetNextImage
-        //Spinnaker::GenApi::CFloatPtr ptrExposureTime = this->node_map_->GetNode("ExposureTime");
-        //if (!IsAvailable(ptrExposureTime) || !IsReadable(ptrExposureTime))
-        //{
-        //    std::cout << "Unable to read exposure time. Aborting..." << std::endl;
-        //}
-        // The exposure time is retrieved in µs so it needs to be converted to ms
-        //uint64_t timeout = static_cast<uint64_t>(ptrExposureTime->GetValue() / 1000);
-        //std::cout<<"Exposute Time: "<<timeout<<std::endl;
-        //frame.setAttribute<double>("ExposureTimems",timeout);
 
-        //std::cout<<"GOT Image at IDX: "<<buffer_idx<<" time: "<<frame.time.toString()<<std::endl;
+        /** Get Attributes (Metadata) and write them in frame **/
+        Spinnaker::ChunkData chunk_data = image_ptr->GetChunkData();
+        int64_t frame_id = chunk_data.GetFrameID();
+        frame.setAttribute<double>("frame_id", frame_id);
+        double time = image_ptr->GetTimeStamp() * 1e-9;
+        frame.setAttribute<double>("camera_timestamp",time);
+        double exposure_time = static_cast<double>(chunk_data.GetExposureTime());
+        frame.setAttribute<double>("exposure_time_us", exposure_time);
+        double gain = chunk_data.GetGain();
+        frame.setAttribute<double>("gain", gain);
+        frame.setAttribute<uint32_t>("serial_id", serial_);
 
         ++buffer_idx;
         if(buffer_idx >= int(buffer.size()))
